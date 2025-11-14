@@ -1,0 +1,28 @@
+# Binaries and build artifacts
+bin/
+build/
+dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+
+# Go module/package caches (local)
+/.gocache/
+/.gomodcache/
+
+# IDE/editor settings
+.vscode/
+.idea/
+
+# Logs and dumps
+*.log
+*.out
+*.gz
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
