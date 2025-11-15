@@ -10,6 +10,8 @@ type Defaults struct {
 	RPC       RPCDefaults
 	Metrics   MetricsDefaults
 	Validator ValidatorDefaults
+	TxPool    TxPoolDefaults
+	Logging   LoggingDefaults
 }
 
 // NodeDefaults captures top-level node settings (datadir, identity, etc).
@@ -83,12 +85,84 @@ type ValidatorDefaults struct {
 
 // TxPoolDefaults tunes the transaction pool.
 type TxPoolDefaults struct {
-	Journal       string
-	PriceLimit    uint64
-	PriceBump     uint64
-	AccountSlots  uint64
-	GlobalSlots   uint64
-	AccountQueue  uint64
-	GlobalQueue   uint64
-	TxLifetimeSec uint64
+	Journal       string //	Path to a file where the node stores its transaction pool journal (txpool.journal). This is used to store the transaction pool for the node.
+	PriceLimit    uint64 //	Minimum gas price (in wei) a transaction must have to be considered for inclusion in the pool.
+	PriceBump     uint64 //	Percentage bump required to replace an existing transaction from the same sender.
+	AccountSlots  uint64 //	Max number of pending transactions per account admitted into the pool.
+	GlobalSlots   uint64 //	Total pending transaction capacity across all accounts.
+	AccountQueue  uint64 //	Size of queued (but not yet promotable) transactions per account
+	GlobalQueue   uint64 //	Total queued transaction capacity..
+	TxLifetimeSec uint64 //	How long pending transactions remain in the pool before they are dropped as stale.
+}
+
+// LoggingDefaults controls log verbosity/format.
+type LoggingDefaults struct {
+	Verbosity int    //	Log level numeric (0=fatal, 1=error, 2=warn, 3=info, 4=debug, 5=trace).
+	Format    string //	Log output format (text vs json).
+	Color     bool   //	Whether to use ANSI color codes in logs (helpful on terminals, best disabled when piping to files)..
+}
+
+// DefaultConfig returns a fully populated Defaults instance. Update values as
+// the real defaults solidify.
+
+func DefaultConfig() Defaults {
+	return Defaults{
+		Node: NodeDefaults{
+			DataDir:    "~/.opera",
+			Name:       "go-opera",
+			LightKDF:   false,
+			NoUSB:      true,
+			SyncMode:   "full",
+			MaxPeers:   50,
+			ListenAddr: "0.0.0.0",
+			ListenPort: 5050,
+		},
+		Network: NetworkDefaults{
+			NetworkID: 4003,
+			ChainName: "fakenet",
+			Bootnodes: []string{},
+		},
+		Storage: StorageDefaults{
+			CacheSizeMB: 1024,
+			Handles:     512,
+			GCMode:      "full",
+			DBPreset:    "balanced",
+		},
+		RPC: RPCDefaults{
+			EnableHTTP: true,
+			HTTPAddr:   "127.0.0.1",
+			HTTPPort:   18545,
+			HTTPAPI:    []string{"eth", "net", "web3"},
+			EnableWS:   true,
+			WSAddr:     "127.0.0.1",
+			WSPort:     18546,
+			WSAPI:      []string{"eth", "net", "web3"},
+			EnableIPC:  true,
+			IPCPath:    "opera.ipc",
+		},
+		Metrics: MetricsDefaults{
+			Enable:          false,
+			EnableExpensive: false,
+			HTTPAddr:        "127.0.0.1",
+			HTTPPort:        6060,
+		},
+		Validator: ValidatorDefaults{
+			Enabled: false,
+		},
+		TxPool: TxPoolDefaults{
+			Journal:       "transactions.rlp",
+			PriceLimit:    1,
+			PriceBump:     10,
+			AccountSlots:  16,
+			GlobalSlots:   4096,
+			AccountQueue:  64,
+			GlobalQueue:   1024,
+			TxLifetimeSec: 10800,
+		},
+		Logging: LoggingDefaults{
+			Verbosity: 3,
+			Format:    "text",
+			Color:     true,
+		},
+	}
 }
