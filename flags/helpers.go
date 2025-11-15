@@ -19,6 +19,7 @@ package flags
 import (
 	"os"
 
+	"github.com/ethereum/go-ethereum/params"
 	cli "gopkg.in/urfave/cli.v1"
 )
 
@@ -115,7 +116,9 @@ func FlagCategory(flag cli.Flag, flagGroups []FlagGroup) string {
 	return "MISC"
 }
 
-func NewApp() *cli.App {
+// NewApp creates an app with sane defaults.
+
+func NewApp(gitCommit, gitDate, usage string) *cli.App {
 
 	app := cli.NewApp()
 	app.Name = "opera-asset"
@@ -123,7 +126,7 @@ func NewApp() *cli.App {
 	app.Action = func(c *cli.Context) error {
 		return nil
 	}
-	app.Version = "0.1.0"
+	app.Version = params.VersionWithCommit(gitCommit, gitDate)
 	app.Writer = os.Stdout
 	return app
 

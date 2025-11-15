@@ -1,3 +1,9 @@
+/*
+	The launcher is the main entry point for the go-opera-asset command-line interface.
+	It wires together CLI flags, config-file decoding, genesis/fakenet handling, node + consensus setup,
+	and helper commands (dumpconfig, checkconfig).
+*/
+
 package launcher
 
 import (
@@ -5,9 +11,30 @@ import (
 	"fmt"
 
 	"github.com/rony4d/go-opera-asset/flags"
+	"gopkg.in/urfave/cli.v1"
 )
 
-var app = flags.NewApp()
+var (
+
+	// Git SHA1 commit hash of the release (set via linker flags).
+	gitCommit = ""
+	gitDate   = ""
+
+	// The app that holds all commands and flags.
+	app = flags.NewApp(gitCommit, gitDate, "the go-opera-asset command line interface")
+
+	nodeFlags        []cli.Flag
+	testFlags        []cli.Flag
+	gpoFlags         []cli.Flag
+	accountFlags     []cli.Flag
+	performanceFlags []cli.Flag
+	networkingFlags  []cli.Flag
+	txpoolFlags      []cli.Flag
+	operaFlags       []cli.Flag
+	legacyRpcFlags   []cli.Flag
+	rpcFlags         []cli.Flag
+	metricsFlags     []cli.Flag
+)
 
 // Launch is a stub; it will eventually parse flags and start the node.
 func Launch(args []string) error {
