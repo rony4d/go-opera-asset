@@ -38,6 +38,7 @@ type NetworkDefaults struct {
 	ChainName   string   //  Human-readable name for the network (e.g., “Mainnet”, “Testnet”, “Devnet”). This is displayed in logs and user interfaces to help operators identify which network they’re running on. Human-friendly name for the network preset (e.g., mainnet, testnet, fakenet). The name is surfaced in logs, config dumps, and RPC responses so operators know which network they’re attached to.
 	Bootnodes   []string //  Enode URLs the node dials during startup to discover peers. These are hard-coded P2P endpoints that seed the discovery table; without them a fresh node might have no way to join the network.
 	FakeNetSize int      //  Specific to the deterministic fakenet helper; it tells the launcher how many validator slots exist in the synthetic network so it can derive the correct validator key pairs and genesis parameters. For example, 1 yields a single-validator PoA chain, while 5 would generate five validator configs.
+	FakeNet     bool     //  Whether to use the deterministic fakenet helper; when true the node uses the deterministic fakenet helper to generate validator key pairs and genesis parameters.
 }
 
 // StorageDefaults configures database/cache behaviour.
@@ -108,7 +109,7 @@ type LoggingDefaults struct {
 func DefaultConfig() Defaults {
 	return Defaults{
 		Node: NodeDefaults{
-			DataDir:    "~/.opera",
+			DataDir:    "opera-asset-chain/node-data",
 			Name:       "go-opera",
 			LightKDF:   false,
 			NoUSB:      true,
@@ -121,6 +122,7 @@ func DefaultConfig() Defaults {
 			NetworkID: 4003,
 			ChainName: "fakenet",
 			Bootnodes: []string{},
+			FakeNet:   true,
 		},
 		Storage: StorageDefaults{
 			CacheSizeMB: 1024,
