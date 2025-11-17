@@ -24,6 +24,7 @@ type Config struct {
 	LachesisStore LachesisStoreConfig
 	VectorClock   VectorClockConfig
 	DBs           DBsConfig
+	Genesis       GenesisConfig
 }
 
 // MakeConfig merges defaults, optional config file, then CLI flag overrides.
@@ -68,6 +69,7 @@ type OperaConfig struct {
 	NetworkName string
 	NetworkID   uint64
 	FakeNet     bool
+	FakeSlots   int
 }
 
 type EmitterConfig struct {
@@ -114,6 +116,10 @@ type DBsConfig struct {
 	Routing      map[string]string
 }
 
+type GenesisConfig struct {
+	Path string
+}
+
 // -----------------------------------------------------------------------------
 // Default config + builders
 // -----------------------------------------------------------------------------
@@ -155,6 +161,7 @@ func defaultConfig() Config {
 			NetworkName: DefaultConfig().Network.ChainName,
 			NetworkID:   DefaultConfig().Network.NetworkID,
 			FakeNet:     DefaultConfig().Network.FakeNet,
+			FakeSlots:   DefaultConfig().Network.FakeNetSize,
 		},
 		Emitter: EmitterConfig{},
 		TxPool: TxPoolConfig{
@@ -172,6 +179,9 @@ func defaultConfig() Config {
 		LachesisStore: LachesisStoreConfig{CacheMB: 512},
 		VectorClock:   VectorClockConfig{CacheSize: 64 * 1024},
 		DBs:           DBsConfig{RootDir: "databases", RuntimeCache: 1024, Routing: map[string]string{}},
+		Genesis: GenesisConfig{
+			Path: DefaultConfig().Genesis.Path,
+		},
 	}
 }
 
@@ -290,7 +300,7 @@ func applyCLIOverrides(ctx *cli.Context, cfg *Config) {
 	}
 
 	if ctx.IsSet("genesis") {
-		// cfg.Genesis.Path = ctx.String("genesis")
+		cfg.Genesis.Path = ctx.String("genesis")
 	}
 	if ctx.IsSet("fakenet") {
 		cfg.Opera.FakeNet = true

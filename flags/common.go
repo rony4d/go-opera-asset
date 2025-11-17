@@ -95,5 +95,10 @@ func CommonFlags() []cli.Flag {
 			Usage: "Global JSON-RPC request timeout",
 			Value: 30 * time.Second,
 		},
+		cli.StringFlag{
+			Name:  "genesis",
+			Usage: "Path to the genesis file",
+			Value: "genesis.json",
+		},
 	}
 }

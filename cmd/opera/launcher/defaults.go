@@ -12,6 +12,7 @@ type Defaults struct {
 	Validator ValidatorDefaults
 	TxPool    TxPoolDefaults
 	Logging   LoggingDefaults
+	Genesis   GenesisDefaults
 }
 
 // NodeDefaults captures top-level node settings (datadir, identity, etc).
@@ -103,6 +104,11 @@ type LoggingDefaults struct {
 	Color     bool   //	Whether to use ANSI color codes in logs (helpful on terminals, best disabled when piping to files)..
 }
 
+// GenesisDefaults controls genesis file settings.
+type GenesisDefaults struct {
+	Path string //	Path to the genesis file.
+}
+
 // DefaultConfig returns a fully populated Defaults instance. Update values as
 // the real defaults solidify.
 
@@ -165,6 +171,9 @@ func DefaultConfig() Defaults {
 			Verbosity: 3,
 			Format:    "text",
 			Color:     true,
+		},
+		Genesis: GenesisDefaults{
+			Path: "genesis.json",
 		},
 	}
 }

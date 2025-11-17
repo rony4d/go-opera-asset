@@ -3,7 +3,7 @@ package test
 import (
 	// "gopkg.in/urfave/cli.v1"
 	// "runtime"
-	// "strings"
+	"strings"
 
 	"path/filepath"
 	"testing"
@@ -105,6 +105,74 @@ func TestMakeAllConfigs_flagOverrides(t *testing.T) {
 				// bootnodes list should split on comma and trim whitespace.
 				if len(cfg.Node.P2P.Bootnodes) != 2 || cfg.Node.P2P.Bootnodes[0] != "enode://abc@1.2.3.4:5050" {
 					t.Fatalf("Bootnodes = %#v, want two entries", cfg.Node.P2P.Bootnodes)
+				}
+			},
+		},
+		{
+			name: "RPC toggle and APIs",
+			args: []string{
+				"--http", "--http.addr", "0.0.0.0", "--http.port", "19545", "--http.api", "eth,net,web3,ftm",
+				"--ws", "--ws.addr", "0.0.0.0", "--ws.port", "19546", "--ws.api", "eth,net",
+				"--ipc", "--ipc.path", "/tmp/opera.ipc",
+			},
+			want: func(t *testing.T, cfg launcher.Config) {
+
+				// HTTP flags toggled and addresses applied.
+				if !cfg.Node.RPC.HTTPEnabled || cfg.Node.RPC.HTTPAddr != "0.0.0.0" || cfg.Node.RPC.HTTPPort != 19545 {
+					t.Fatalf("HTTP config not applied: %#v", cfg.Node.RPC)
+				}
+				// API list trimmed and split.
+				if strings.Join(cfg.Node.RPC.HTTPAPI, ",") != "eth,net,web3,ftm" {
+					t.Fatalf("HTTP API = %v", cfg.Node.RPC.HTTPAPI)
+				}
+				// WS overrides valid.
+				if !cfg.Node.RPC.EnableWS || cfg.Node.RPC.WSPort != 19546 {
+					t.Fatalf("WS config not applied: %#v", cfg.Node.RPC)
+				}
+				// IPC flag + path.
+				if !cfg.Node.RPC.EnableIPC || cfg.Node.RPC.IPCPath != "/tmp/opera.ipc" {
+					t.Fatalf("IPC config not applied: %#v", cfg.Node.RPC)
+				}
+			},
+		},
+
+		{
+			name: "Txpool overrides",
+			args: []string{
+				"--txpool.journal", "custom.rlp",
+				"--txpool.pricelimit", "5",
+				"--txpool.pricebump", "20",
+				"--txpool.localslots", "42",
+				"--txpool.globalslots", "999",
+				"--txpool.localqueue", "12",
+				"--txpool.globalqueue", "777",
+				"--txpool.lifetime", "3600",
+			},
+			want: func(t *testing.T, cfg launcher.Config) {
+				got := cfg.TxPool
+				// Strings and scalar overrides should pass through verbatim.
+				if got.Journal != "custom.rlp" || got.PriceLimit != 5 || got.PriceBump != 20 {
+					t.Fatalf("TxPool basic overrides failed: %#v", got)
+				}
+				// Numeric fields for slots/queues/lifetime rely on conversions; verify each.
+				if got.AccountSlots != 42 || got.GlobalSlots != 999 {
+					t.Fatalf("TxPool slots mismatch: %#v", got)
+				}
+				if got.AccountQueue != 12 || got.GlobalQueue != 777 {
+					t.Fatalf("TxPool queue mismatch: %#v", got)
+				}
+				if got.TxLifetimeSec != 3600 {
+					t.Fatalf("TxPool TxLifetime = %d", got.TxLifetimeSec)
+				}
+			},
+		},
+		{
+			name: "Genesis flags",
+			args: []string{"--genesis", "/tmp/genesis.toml"},
+			want: func(t *testing.T, cfg launcher.Config) {
+				// Path to genesis file should copy directly.
+				if cfg.Genesis.Path != "/tmp/genesis.toml" {
+					t.Fatalf("Genesis path = %q", cfg.Genesis.Path)
 				}
 			},
 		},
