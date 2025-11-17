@@ -49,3 +49,8 @@ Delve is picking up the Go toolchain it finds first on your system `PATH`, which
 4. **Restart the Go extension ( I didn't have to do this, it just worked )** (Command Palette → “Developer: Reload Window”) and re-run the debug session.
 
 With those overrides, Cursor will launch Delve using Go 1.20.14 even though a newer Go is present globally, eliminating the “Delve too old for Go 1.24” error.
+
+
+## Running Tests
+
+use **go test -v ./test** to run all tests and log everything

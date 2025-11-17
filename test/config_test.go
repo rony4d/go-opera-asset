@@ -72,21 +72,40 @@ func TestMakeAllConfigs_flagOverrides(t *testing.T) {
 	}{
 		{
 			name: "datadir and identity",
-			args: []string{"--datadir", projectRoot + launcher.DefaultConfig().Node.DataDir, "--identity", "go-opera"},
+			args: []string{"--datadir", projectRoot + "/opera-asset-chain/devnet/node-data", "--identity", "ugo-node"}, //	NOTE: this is the command line argument that overrides the default data dir and identity
 			want: func(t *testing.T, cfg launcher.Config) {
 
-				// Expect the datadir to be the project root + the default data dir.
-				if cfg.Node.DataDir != filepath.Join(projectRoot+launcher.DefaultConfig().Node.DataDir) {
-					t.Fatalf("Datadir = %q, want ~/.opera", cfg.Node.DataDir)
+				// Expect the datadir to be overridden by the --datadir flag command line argument.
+				if cfg.Node.DataDir != filepath.Join(projectRoot+"/opera-asset-chain/devnet/node-data") {
+					t.Fatalf("Datadir = %q, want %q", cfg.Node.DataDir, filepath.Join(projectRoot+"/opera-asset-chain/devnet/node-data"))
 				}
-
 				t.Logf("cfg.Node.DataDir = %q", cfg.Node.DataDir) //	NOTE: this will only be printed if the test fails
-				// Expect the identity to be the default name (go-opera).
-				if cfg.Node.Name != "go-opera" {
+
+				// Expect the identity to be overridden by the --identity flag command line argument.
+				if cfg.Node.Name != "ugo-node" {
 					t.Fatalf("Identity = %q, want go-opera", cfg.Node.Name)
 				}
 				t.Logf("cfg.Node.Name = %q", cfg.Node.Name) //	NOTE: this will only be printed if the test fails
 
+			},
+		},
+
+		{
+			name: "P2P and bootnodes",
+			args: []string{"--port", "5151", "--maxpeers", "99", "--bootnodes", "enode://abc@1.2.3.4:5050,enode://def@5.6.7.8:5050"},
+			want: func(t *testing.T, cfg launcher.Config) {
+				// port -> ListenPort override
+				if cfg.Node.P2P.ListenPort != 5151 {
+					t.Fatalf("ListenPort = %d, want 5151", cfg.Node.P2P.ListenPort)
+				}
+				// maxpeers -> MaxPeers
+				if cfg.Node.P2P.MaxPeers != 99 {
+					t.Fatalf("MaxPeers = %d, want 99", cfg.Node.P2P.MaxPeers)
+				}
+				// bootnodes list should split on comma and trim whitespace.
+				if len(cfg.Node.P2P.Bootnodes) != 2 || cfg.Node.P2P.Bootnodes[0] != "enode://abc@1.2.3.4:5050" {
+					t.Fatalf("Bootnodes = %#v, want two entries", cfg.Node.P2P.Bootnodes)
+				}
 			},
 		},
 	}

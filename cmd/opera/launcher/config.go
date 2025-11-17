@@ -131,6 +131,7 @@ func defaultConfig() Config {
 				ListenAddr: DefaultConfig().Node.ListenAddr,
 				ListenPort: DefaultConfig().Node.ListenPort,
 				MaxPeers:   DefaultConfig().Node.MaxPeers,
+				Bootnodes:  DefaultConfig().Network.Bootnodes,
 			},
 			RPC: RPCConfig{
 				HTTPEnabled: true,
