@@ -1,8 +1,6 @@
 package test
 
 import (
-	// "gopkg.in/urfave/cli.v1"
-	// "runtime"
 	"strings"
 
 	"path/filepath"
