@@ -14,6 +14,11 @@ import (
 	"gopkg.in/urfave/cli.v1"
 )
 
+const (
+	// clientIdentifier to advertise over the network.
+	clientIdentifier = "go-opera"
+)
+
 var (
 
 	// Git SHA1 commit hash of the release (set via linker flags).
@@ -35,6 +40,10 @@ var (
 	rpcFlags         []cli.Flag
 	metricsFlags     []cli.Flag
 )
+
+func initFlags() {
+
+}
 
 // Launch is a stub; it will eventually parse flags and start the node.
 func Launch(args []string) error {
