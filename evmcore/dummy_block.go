@@ -178,3 +178,123 @@ func ConvertFromEthHeader(h *types.Header) *EvmHeader {
 		BaseFee:    h.BaseFee,                     // Base fee (EIP-1559)
 	}
 }
+
+// EthHeader converts an EvmHeader into Ethereum's standard header format (types.Header).
+// This is used when Opera blocks need to be executed by Ethereum's EVM or when
+// interfacing with Ethereum-compatible RPC APIs.
+//
+// Returns:
+//   - Pointer to types.Header (nil if receiver is nil)
+//
+// NOTE: This conversion is incomplete - GasLimit is clamped to avoid parsing issues
+// with Ethereum tooling that may not handle MaxUint64 correctly. The Opera block
+// hash is stored in the Extra field since Ethereum headers don't have a direct
+// hash field (hash is computed from other fields).
+func (h *EvmHeader) EthHeader() *types.Header {
+	if h == nil {
+		return nil
+	}
+
+	// NOTE: incomplete conversion - GasLimit clamped to avoid parsing issues
+	ethHeader := &types.Header{
+		Number:   h.Number,       // Block number
+		Coinbase: h.Coinbase,     // Validator/miner address
+		GasLimit: 0xffffffffffff, // Clamp GasLimit (don't use h.GasLimit's MaxUint64)
+		// Some Ethereum tools can't parse MaxUint64
+		GasUsed:    h.GasUsed,             // Gas consumed
+		Root:       h.Root,                // State root
+		TxHash:     h.TxHash,              // Transaction root
+		ParentHash: h.ParentHash,          // Parent hash
+		Time:       uint64(h.Time.Unix()), // Convert Opera timestamp to Unix uint64
+		Extra:      h.Hash.Bytes(),        // Store Opera hash in Extra field
+		BaseFee:    h.BaseFee,             // Base fee (EIP-1559)
+
+		Difficulty: new(big.Int), // Zero difficulty (Opera doesn't use PoW)
+	}
+
+	// Set the external hash (Opera's consensus hash) using Ethereum's extension mechanism
+	ethHeader.SetExternalHash(h.Hash)
+	return ethHeader
+}
+
+// Header returns a deep copy of the block's header. This is used when you need
+// to modify header fields without affecting the original block.
+//
+// Returns:
+//   - Pointer to a new EvmHeader (nil if block is nil)
+//
+// The copy includes:
+//   - All struct fields (copied by value)
+//   - Number and BaseFee (big.Int pointers are deep-copied)
+func (b *EvmBlock) Header() *EvmHeader {
+	if b == nil {
+		return nil
+	}
+
+	// Copy header struct (copies all fields by value)
+	h := b.EvmHeader
+
+	// Deep copy big.Int pointers (they're mutable, so we need new instances)
+	h.Number = new(big.Int).Set(b.Number)
+	if b.BaseFee != nil {
+		h.BaseFee = new(big.Int).Set(b.BaseFee)
+	}
+
+	return &h
+}
+
+// EthBlock converts an EvmBlock into Ethereum's standard block format (types.Block).
+// This is used when Opera blocks need to be executed by Ethereum's EVM or when
+// returning blocks via Ethereum-compatible RPC APIs.
+//
+// Returns:
+//   - Pointer to types.Block (nil if block is nil)
+//
+// The conversion includes:
+//   - Header conversion (via EthHeader())
+//   - Transaction list (direct copy)
+//   - Empty uncles list (Opera doesn't have uncle blocks)
+//   - Empty receipts (receipts are computed during execution, not stored in block)
+func (b *EvmBlock) EthBlock() *types.Block {
+	if b == nil {
+		return nil
+	}
+
+	// Create Ethereum block with:
+	//   - Converted header (via EthHeader())
+	//   - Transaction list (direct copy)
+	//   - nil uncles (Opera doesn't have uncle blocks)
+	//   - nil receipts (computed during execution)
+	//   - StackTrie for efficient hashing
+	return types.NewBlock(
+		b.EvmHeader.EthHeader(), // Convert header to Ethereum format
+		b.Transactions,          // Include transactions
+		nil,                     // No uncles (Opera doesn't have them)
+		nil,                     // No receipts (computed during execution)
+		trie.NewStackTrie(nil),  // Efficient trie for hashing
+	)
+}
+
+// EstimateSize returns an approximate size estimate of the block in bytes.
+// This is used for memory management and network transfer size estimation.
+//
+// Returns:
+//   - Estimated size in bytes
+//
+// The estimate includes:
+//   - Transaction data sizes (sum of all tx.Data() lengths)
+//   - Overhead per transaction (~256 bytes for headers/metadata)
+//
+// This is a rough estimate and may not match the actual serialized size exactly.
+func (b *EvmBlock) EstimateSize() int {
+	est := 0
+
+	// Sum up all transaction data sizes
+	for _, tx := range b.Transactions {
+		est += len(tx.Data()) // Add transaction payload size
+	}
+
+	// Add overhead per transaction (headers, signatures, etc.)
+	// ~256 bytes per transaction is a reasonable estimate
+	return est + b.Transactions.Len()*256
+}
