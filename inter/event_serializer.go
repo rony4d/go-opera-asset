@@ -463,6 +463,11 @@ func (e *MutableEventPayload) UnmarshalBinary(raw []byte) (err error) {
 	return cser.UnmarshalBinaryAdapter(raw, e.UnmarshalCSER)
 }
 
+// MarshalBinary implements encoding.BinaryMarshaller.
+func (e *EventPayload) MarshalBinary() ([]byte, error) {
+	return cser.MarshalBinaryAdapter(e.MarshalCSER)
+}
+
 // UnmarshalBinary for EventPayload (Immutable).
 // It uses MutableEventPayload as an intermediate builder.
 func (e *EventPayload) UnmarshalBinary(raw []byte) (err error) {
