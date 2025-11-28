@@ -49,7 +49,7 @@ In LlrSignedEpochVote: You have EpochVote. You are given Hash(BlockVotes). You c
 If you swap the order in the hash function, the resulting hash will differ, and signature verification will fail.
 */
 
-// LLR (Long-Lasting Round) votes are used to reach consensus on large-scale events
+// LLR (Lachesis Light Repeater) votes are used to reach consensus on large-scale events
 // like confirming blocks or sealing epochs. They are carried inside standard DAG events.
 
 // LlrBlockVotes represents a batch of votes for a sequence of blocks.

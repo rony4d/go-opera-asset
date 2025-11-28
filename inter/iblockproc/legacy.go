@@ -1,4 +1,4 @@
-// Package iblockproc defines structures and interfaces for block processing and state management within the consensus engine.
+// Package iblockproc defines the structures and logic for processing inter-block state.
 // This specific file (legacy.go) defines legacy versions of epoch state structures (V0).
 // These are typically preserved to maintain backward compatibility, allowing the node to
 // read or migrate data from older database formats or earlier network versions.
