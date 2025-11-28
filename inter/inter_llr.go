@@ -11,7 +11,7 @@ import (
 /*
 This file defines how "Votes" are extracted and verified separately from the rest of the Event.
 1. What is LLR?
-LLR stands for Long-Lasting Round. In this consensus protocol (likely a variant of Lachesis or Opera), consensus happens in two layers:
+LLR stands for Lachesis Light Repeater. In this consensus protocol (likely a variant of Lachesis or Opera), consensus happens in two layers:
 DAG Layer: Fast, asynchronous ordering of events.
 Block/Epoch Layer (LLR): A slower, heavier process where validators vote to "finalize" blocks and seal epochs.
 This file handles the data structures for this second layer.
