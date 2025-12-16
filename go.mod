@@ -10,6 +10,7 @@ require (
 	github.com/getsentry/raven-go v0.2.0 // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/stretchr/testify v1.7.2
+	github.com/syndtr/goleveldb v1.0.1-0.20220614013038-64ee5596c38a
 	gopkg.in/urfave/cli.v1 v1.20.0 // gopkg.in/urfave/cli.v1 is a popular Go library for building rich command-line interfaces—think commands, subcommands, flags, usage text, help output, etc
 
 )
